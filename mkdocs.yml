@@ -1,0 +1,165 @@
+site_name: Virak Cloud Terraform Provider
+site_description: Terraform provider for Virak Cloud
+site_author: Virak Cloud
+site_url: https://virak-cloud.github.io/terraform-provider-virak/
+repo_url: https://github.com/virak-cloud/terraform-provider-virak
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  custom_dir: overrides
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.footnote.tooltips
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+  icon:
+    logo: material/cloud
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    previous: fontawesome/solid/angle-left
+    next: fontawesome/solid/angle-right
+  language: en
+
+plugins:
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - social:
+      cards_layout_options:
+        background_color: "#1e3a8a"
+        color: "#ffffff"
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - meta
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section for reference
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/virak-cloud/terraform-provider-virak
+    - icon: fontawesome/solid/server
+      link: https://registry.terraform.io/providers/virak-cloud/virakcloud
+
+nav:
+  - Home: index.md
+  - Data Sources:
+      - Instance Images: data-sources/instance_images.md
+      - Instance Service Offerings: data-sources/instance_service_offerings.md
+      - Kubernetes Versions: data-sources/kubernetes_versions.md
+      - Network Service Offerings: data-sources/network_service_offerings.md
+      - Networks: data-sources/networks.md
+      - Volume Service Offerings: data-sources/volume_service_offerings.md
+      - Zone Services: data-sources/zone_services.md
+      - Zones: data-sources/zones.md
+  - Resources:
+      - Bucket: resources/bucket.md
+      - DNS Domain: resources/dns_domain.md
+      - DNS Record: resources/dns_record.md
+      - Firewall Rule: resources/firewall_rule.md
+      - Instance: resources/instance.md
+      - Kubernetes Cluster: resources/kubernetes_cluster.md
+      - Load Balancer: resources/load_balancer.md
+      - Load Balancer Backend: resources/load_balancer_backend.md
+      - Network: resources/network.md
+      - Network VPN: resources/network_vpn.md
+      - Port Forwarding Rule: resources/port_forwarding_rule.md
+      - Public IP: resources/public_ip.md
+      - Snapshot: resources/snapshot.md
+      - SSH Key: resources/ssh_key.md
+      - Volume: resources/volume.md
