@@ -1,0 +1,11 @@
+# Zone ID where resources will be created
+zone_id = "your-zone-id-here"
+
+# Network service offering ID
+network_offering_id = "your-network-offering-id-here"
+
+# Instance service offering ID
+instance_offering_id = "your-instance-offering-id-here"
+
+# VM image ID
+vm_image_id = "your-vm-image-id-here"

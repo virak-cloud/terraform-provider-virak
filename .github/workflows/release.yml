@@ -1,0 +1,105 @@
+# .github/workflows/release.yml
+name: release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
+      - name: Install tfplugindocs
+        run: go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+      - name: Build provider for docs
+        run: go build -o terraform-provider-virakcloud .
+      - name: Generate documentation
+        run: tfplugindocs generate --provider-name virakcloud
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - name: Cache MkDocs
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: ${{ runner.os }}-mkdocs-${{ hashFiles('mkdocs.yml', 'docs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-mkdocs-
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-material mkdocs-minify-plugin mkdocs-material[imaging]
+      - name: Build docs site
+        run: mkdocs build
+      - name: Upload docs site
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: site/
+  release:
+    runs-on: ubuntu-latest
+    needs: docs
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download docs site
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-site
+          path: site/
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Remove build artifact before release
+        run: rm -f terraform-provider-virakcloud
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: ${{ startsWith(github.ref, 'refs/tags/') && 'release --clean --parallelism=2' || 'release --snapshot --clean --parallelism=2' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - name: Create beta release
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          gh release create beta-${{ github.sha }} $(find ./dist -type f) --title "Beta Release ${{ github.sha }}" --generate-notes --prerelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Write release summary
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+            echo "Terraform Provider Virak Cloud v${{ github.ref_name }} has been released successfully." >> $GITHUB_STEP_SUMMARY
+            echo "Binaries and documentation have been published." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Beta Release Summary" >> $GITHUB_STEP_SUMMARY
+            echo "Beta release beta-${{ github.sha }} has been published." >> $GITHUB_STEP_SUMMARY
+            echo "Binaries and documentation have been published." >> $GITHUB_STEP_SUMMARY
+          fi

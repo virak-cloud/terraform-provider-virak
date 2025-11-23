@@ -1,0 +1,4 @@
+# Copy this file to terraform.tfvars and fill in your values
+# Do not commit terraform.tfvars to version control
+
+virakcloud_token = "your-api-token-here"

@@ -1,0 +1,45 @@
+{
+  "projectTitle": "Virak Cloud Terraform Provider",
+  "description": "A Terraform provider for managing cloud infrastructure on the Virak Cloud platform, including instances, networks, volumes, Kubernetes clusters, buckets, and DNS resources.",
+  "folders": [
+    "internal/",
+    "internal/provider/",
+    "internal/models/",
+    "examples/",
+    "docs/",
+    "templates/",
+    "overrides/",
+    "cmd/"
+  ],
+  "excludeFolders": [
+    ".git/",
+    "bin/",
+    "again/",
+    ".terraform/",
+    "build/",
+    "dist/",
+    "site/"
+  ],
+  "excludeFiles": [
+    "*.backup",
+    "*.tfstate",
+    "*.tfstate.*",
+    "*.tfplan",
+    "*.tfplan-*",
+    ".terraform.lock.hcl",
+    ".terraformrc",
+    "terraform.tfvars",
+    "*.zip",
+    "*.tar.gz",
+    "go.sum"
+  ],
+  "rules": [
+    "Configure the provider with a valid API token before using resources or data sources. Set via configuration or VIRAKCLOUD_TOKEN environment variable.",
+    "Ensure proper resource dependencies for networks and volumes before attaching to instances. Use explicit depends_on or reference attributes.",
+    "Always specify a valid zone_id when creating resources, as all resources must be created in a specific zone. Use the virakcloud_zones data source to list available zones.",
+    "Use the correct network type (L2 or Isolated) based on your requirements. Isolated networks support custom gateways and netmasks, while L2 networks provide basic layer 2 connectivity.",
+    "Use descriptive and unique names for resources to avoid conflicts. Network names must be unique within a zone, and resource names should follow your organization's naming conventions.",
+    "Store Terraform state files securely and consider using remote state storage for team collaboration. Avoid committing .tfstate files to version control."
+  ],
+  "previousVersions": []
+}

@@ -1,0 +1,48 @@
+# .goreleaser.yml
+version: 2
+project_name: terraform-provider-virakcloud
+builds:
+  - id: terraform-provider-virakcloud
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    binary: '{{ .ProjectName }}_v{{ .Version }}'
+    main: .
+    mod_timestamp: '{{ .CommitTimestamp }}'
+archives:
+  - id: terraform-provider-virakcloud
+    formats: [ 'zip', 'tar.gz' ]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}_{{ .Commit }}'
+  - id: docs
+    formats: [ 'zip', 'tar.gz' ]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_docs_{{ .Commit }}'
+    meta: true
+    files:
+      - site/
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS_{{ .Commit }}'
+  algorithm: sha256
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+release:
+  github:
+    owner: virak-cloud
+    name: terraform-provider-virak
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

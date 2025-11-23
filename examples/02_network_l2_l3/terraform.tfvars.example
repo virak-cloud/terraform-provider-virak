@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your values
+# Do not commit terraform.tfvars to version control
+#
+# NOTE: Environment variables are now the preferred method for provider configuration:
+# - VIRAKCLOUD_TOKEN (required)
+#
+# The values below are OPTIONAL OVERRIDES for environment variables.
+# Use only when you need to override environment variables for specific configurations.
+
+virakcloud_token = "your-api-token-here"

@@ -1,0 +1,50 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Terraform specific
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+terraform.tfvars
+.env
+.terraformrc
+terraform.rc
+.terraform.lock.hcl
+tfplan*
+*.zip
+*.backup
+
+# Build artifacts
+terraform-provider
+
+docs/
+dist/
+.cache/
+site/
+terraform-dev
+terraform-provider-virakcloud
