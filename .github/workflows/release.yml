@@ -74,8 +74,8 @@ jobs:
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v5
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          gpg_private_key: ${{ secrets.ORG_GPG_KEY }}
+          passphrase: ${{ secrets.ORG_GPG_PASS }}
       - name: Remove build artifact before release
         run: rm -f terraform-provider-virakcloud
       - name: Run GoReleaser
