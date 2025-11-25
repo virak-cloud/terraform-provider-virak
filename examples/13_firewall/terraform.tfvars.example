@@ -1,5 +1,0 @@
-# Zone ID where resources will be created
-zone_id = "your-zone-id-here"
-
-# Network service offering ID
-network_offering_id = "your-network-offering-id-here"
