@@ -25,7 +25,7 @@ data "virakcloud_volume_service_offerings" "available" {
 resource "virakcloud_volume" "example" {
   name                = "createdbyterraformvolume2"
   zone_id             = data.virakcloud_zones.available.zones[0].id
-  service_offering_id = "01h75a4gz97t2qbghm9xtr8ytd" # g01-01-025-250-v3
+  service_offering_id = data.virakcloud_volume_service_offerings.available.offerings[0].id
   size                = 25
   # instance_id not set, so volume is created standalone
 }

@@ -21,13 +21,18 @@ data "virakcloud_volume_service_offerings" "available" {
   zone_id = data.virakcloud_zones.available.zones[0].id
 }
 
+# Data Sources - Fetch available networks
+data "virakcloud_networks" "available" {
+  zone_id = data.virakcloud_zones.available.zones[0].id
+}
+
 # Instance Resource - Create an instance with a public network
 resource "virakcloud_instance" "instance_with_volume" {
   name                = "test-instance-with-volume-${random_string.suffix.result}"
   zone_id             = data.virakcloud_zones.available.zones[0].id
   service_offering_id = data.virakcloud_instance_service_offerings.available.offerings[0].id
   vm_image_id         = data.virakcloud_instance_images.available.images[0].id
-  network_ids         = ["01hr734dtynn8x3yf2h2j07hp9"]
+  network_ids         = [data.virakcloud_networks.available.networks[0].id]
 }
 
 # Volume Resource - Create a separate volume
