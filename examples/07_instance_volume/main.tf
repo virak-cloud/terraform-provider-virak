@@ -1,6 +1,6 @@
 # Provider configuration
 provider "virakcloud" {
-  token    = var.virakcloud_token
+  token = var.virakcloud_token
 }
 
 # Data Sources - Fetch available zones
@@ -49,7 +49,7 @@ resource "virakcloud_instance" "example" {
 resource "virakcloud_volume" "example" {
   name                = "test-volume-${random_string.suffix.result}"
   zone_id             = data.virakcloud_zones.available.zones[0].id
-  service_offering_id  = data.virakcloud_volume_service_offerings.available.offerings[0].id
+  service_offering_id = data.virakcloud_volume_service_offerings.available.offerings[0].id
   size                = 25
   instance_id         = virakcloud_instance.example.id
 }

@@ -2,29 +2,29 @@ output "volumes_summary" {
   description = "Summary of all created volumes"
   value = {
     root_volume = {
-      id     = virakcloud_volume.root_volume.id
-      name   = virakcloud_volume.root_volume.name
-      size   = virakcloud_volume.root_volume.size
+      id   = virakcloud_volume.root_volume.id
+      name = virakcloud_volume.root_volume.name
+      size = virakcloud_volume.root_volume.size
     }
     data_volume = {
-      id     = virakcloud_volume.data_volume.id
-      name   = virakcloud_volume.data_volume.name
-      size   = virakcloud_volume.data_volume.size
+      id   = virakcloud_volume.data_volume.id
+      name = virakcloud_volume.data_volume.name
+      size = virakcloud_volume.data_volume.size
     }
     backup_volume = {
-      id     = virakcloud_volume.backup_volume.id
-      name   = virakcloud_volume.backup_volume.name
-      size   = virakcloud_volume.backup_volume.size
+      id   = virakcloud_volume.backup_volume.id
+      name = virakcloud_volume.backup_volume.name
+      size = virakcloud_volume.backup_volume.size
     }
     staging_volume = {
-      id     = virakcloud_volume.staging_volume.id
-      name   = virakcloud_volume.staging_volume.name
-      size   = virakcloud_volume.staging_volume.size
+      id   = virakcloud_volume.staging_volume.id
+      name = virakcloud_volume.staging_volume.name
+      size = virakcloud_volume.staging_volume.size
     }
     temporary_volume = {
-      id     = virakcloud_volume.temporary_volume.id
-      name   = virakcloud_volume.temporary_volume.name
-      size   = virakcloud_volume.temporary_volume.size
+      id   = virakcloud_volume.temporary_volume.id
+      name = virakcloud_volume.temporary_volume.name
+      size = virakcloud_volume.temporary_volume.size
     }
   }
 }
@@ -42,7 +42,7 @@ output "instance_volumes" {
       ]
     }
     migration_target = {
-      instance_id = virakcloud_instance.migration_target.id
+      instance_id      = virakcloud_instance.migration_target.id
       attached_volumes = []
     }
   }

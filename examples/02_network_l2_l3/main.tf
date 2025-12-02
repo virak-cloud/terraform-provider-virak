@@ -1,6 +1,6 @@
 # Provider configuration
 provider "virakcloud" {
-  token    = var.virakcloud_token
+  token = var.virakcloud_token
 }
 
 # Data Sources

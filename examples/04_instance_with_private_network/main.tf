@@ -1,6 +1,6 @@
 # Provider configuration
 provider "virakcloud" {
-  token    = var.virakcloud_token
+  token = var.virakcloud_token
 }
 
 # Data Sources - Fetch available zones
@@ -23,12 +23,12 @@ data "virakcloud_instance_images" "available" {
 
 # Private L3 Network Resource
 resource "virakcloud_network" "private_network" {
-  name                 = "test-private-network-${random_string.suffix.result}"
-  zone_id              = data.virakcloud_zones.available.zones[0].id
-  network_offering_id  = data.virakcloud_network_service_offerings.available.offerings[0].id
-  type                 = "L3"
-  gateway              = "192.168.1.1"
-  netmask              = "255.255.255.0"
+  name                = "test-private-network-${random_string.suffix.result}"
+  zone_id             = data.virakcloud_zones.available.zones[0].id
+  network_offering_id = data.virakcloud_network_service_offerings.available.offerings[0].id
+  type                = "L3"
+  gateway             = "192.168.1.1"
+  netmask             = "255.255.255.0"
 }
 
 # Instance Resource - Create an instance attached to the private network

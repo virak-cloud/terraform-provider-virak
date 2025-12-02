@@ -1,6 +1,6 @@
 provider "virakcloud" {
-  token    = var.virakcloud_token
-  verbose  = true
+  token   = var.virakcloud_token
+  verbose = true
 }
 
 # Data Sources - Fetch available zones
