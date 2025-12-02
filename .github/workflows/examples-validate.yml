@@ -88,7 +88,7 @@ jobs:
 
       - name: Create Terraform config for local provider
         run: |
-          cat > ~/.terraformrc <<'EOF'
+          cat > ~/.terraformrc <<EOF
           provider_installation {
             filesystem_mirror {
               path    = "$HOME/.terraform.d/plugins"
