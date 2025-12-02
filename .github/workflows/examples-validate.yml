@@ -70,18 +70,33 @@ jobs:
         with:
           name: provider-binary
 
-      - name: Make provider binary executable
-        run: chmod +x terraform-provider-virakcloud
-
-      - name: Create dev override config
+      - name: Install provider as local plugin
         run: |
-          mkdir -p ~/.terraform.d/plugins
-          cat > ~/.terraformrc <<EOF
+          # Create the local provider directory structure
+          # Format: ~/.terraform.d/plugins/terraform.local/local/virakcloud/<version>/<os>_<arch>/
+          PROVIDER_DIR="$HOME/.terraform.d/plugins/terraform.local/local/virakcloud/0.0.1/linux_amd64"
+          mkdir -p "$PROVIDER_DIR"
+          
+          # Make the binary executable
+          chmod +x terraform-provider-virakcloud
+          
+          # Copy binary to local provider location
+          cp terraform-provider-virakcloud "$PROVIDER_DIR/"
+          
+          # Verify installation
+          ls -lah "$PROVIDER_DIR/"
+
+      - name: Create Terraform config for local provider
+        run: |
+          cat > ~/.terraformrc <<'EOF'
           provider_installation {
-            dev_overrides {
-              "terraform.local/local/virakcloud" = "${{ github.workspace }}"
+            filesystem_mirror {
+              path    = "$HOME/.terraform.d/plugins"
+              include = ["terraform.local/local/*"]
             }
-            direct {}
+            direct {
+              exclude = ["terraform.local/local/*"]
+            }
           }
           EOF
           cat ~/.terraformrc
@@ -93,6 +108,19 @@ jobs:
           echo "TF_VAR_ssh_key_id=dummy_ssh_key" >> $GITHUB_ENV
           echo "TF_LOG=DEBUG" >> $GITHUB_ENV
           echo "TF_LOG_PATH=${{ github.workspace }}/terraform-${{ matrix.example }}.log" >> $GITHUB_ENV
+
+      - name: Verify local provider installation
+        run: |
+          echo "=== Checking provider installation ==="
+          PROVIDER_DIR="$HOME/.terraform.d/plugins/terraform.local/local/virakcloud/0.0.1/linux_amd64"
+          if [ -f "$PROVIDER_DIR/terraform-provider-virakcloud" ]; then
+            echo "✓ Provider binary found at $PROVIDER_DIR"
+            "$PROVIDER_DIR/terraform-provider-virakcloud" --version || echo "Provider version check not available"
+          else
+            echo "✗ Provider binary NOT found"
+            ls -R "$HOME/.terraform.d/plugins/" 2>/dev/null || echo "Plugin directory not found"
+            exit 1
+          fi
 
       - name: Initialize Terraform (no backend)
         working-directory: examples/${{ matrix.example }}
