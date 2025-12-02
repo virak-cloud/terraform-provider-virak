@@ -1,0 +1,162 @@
+name: Validate Provider & Examples
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  provider:
+    name: Build & Test Provider
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache: true
+          cache-dependency-path: '**/go.sum'
+
+      - name: Build provider binary
+        run: |
+          go build -o terraform-provider-virakcloud ./
+          ls -lah terraform-provider-virakcloud
+
+      - name: Run provider tests
+        run: go test -v ./...
+
+      - name: Upload provider binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-binary
+          path: terraform-provider-virakcloud
+          retention-days: 5
+
+  examples:
+    name: Validate Examples
+    needs: provider
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - 01_bucket
+          - 02_network_l2_l3
+          - 03_instance_to_public_network
+          - 04_instance_with_private_network
+          - 05_instance_with_volume
+          - 06_volume
+          - 07_instance_volume
+          - 08_kubernetes_cluster
+          - 09_dns
+          - 10_data_sources
+          - 11_advanced_volumes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Download provider binary
+        uses: actions/download-artifact@v4
+        with:
+          name: provider-binary
+
+      - name: Make provider binary executable
+        run: chmod +x terraform-provider-virakcloud
+
+      - name: Create dev override config
+        run: |
+          mkdir -p ~/.terraform.d/plugins
+          cat > ~/.terraformrc <<EOF
+          provider_installation {
+            dev_overrides {
+              "terraform.local/local/virakcloud" = "${{ github.workspace }}"
+            }
+            direct {}
+          }
+          EOF
+          cat ~/.terraformrc
+
+      - name: Set Terraform environment
+        run: |
+          echo "TF_CLI_CONFIG_FILE=$HOME/.terraformrc" >> $GITHUB_ENV
+          echo "TF_VAR_virakcloud_token=fake_token_for_validation" >> $GITHUB_ENV
+          echo "TF_VAR_ssh_key_id=dummy_ssh_key" >> $GITHUB_ENV
+          echo "TF_LOG=DEBUG" >> $GITHUB_ENV
+          echo "TF_LOG_PATH=${{ github.workspace }}/terraform-${{ matrix.example }}.log" >> $GITHUB_ENV
+
+      - name: Initialize Terraform (no backend)
+        working-directory: examples/${{ matrix.example }}
+        run: terraform init -backend=false
+
+      - name: Validate Terraform configuration
+        working-directory: examples/${{ matrix.example }}
+        run: terraform validate
+
+      - name: Check Terraform formatting (optional)
+        working-directory: examples/${{ matrix.example }}
+        continue-on-error: true
+        run: terraform fmt -check -recursive .
+
+      - name: Collect logs and state
+        if: always()
+        run: |
+          mkdir -p logs/${{ matrix.example }}
+          if [ -f "terraform-${{ matrix.example }}.log" ]; then
+            cp terraform-${{ matrix.example }}.log logs/${{ matrix.example }}/
+          fi
+          if [ -d "examples/${{ matrix.example }}/.terraform" ]; then
+            cp -r examples/${{ matrix.example }}/.terraform logs/${{ matrix.example }}/
+          fi
+          if [ -f "examples/${{ matrix.example }}/terraform.lock.hcl" ]; then
+            cp examples/${{ matrix.example }}/terraform.lock.hcl logs/${{ matrix.example }}/
+          fi
+
+      - name: Upload example logs and state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-logs-${{ matrix.example }}
+          path: logs/${{ matrix.example }}/
+          retention-days: 7
+
+  summary:
+    name: Validation Summary
+    needs: examples
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: List validation results
+        run: |
+          echo "=== Validation Summary ==="
+          echo "Provider build and test completed"
+          echo "Examples validated:"
+          ls -la all-artifacts/ | grep example-logs || echo "No logs found"
+
+      - name: Create consolidated logs archive
+        if: always()
+        run: |
+          cd all-artifacts
+          tar -czf ../validation-logs.tar.gz . || true
+
+      - name: Upload consolidated logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-logs-consolidated
+          path: validation-logs.tar.gz
+          retention-days: 7
