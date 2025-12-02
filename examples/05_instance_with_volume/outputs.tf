@@ -26,10 +26,10 @@ output "instance_ip" {
 
 output "volume_id" {
   description = "The ID of the created volume"
-  value       = virakcloud_instance.instance_with_volume.volumes[0].id
+  value       = virakcloud_volume.test_volume.id
 }
 
 output "volume_name" {
   description = "The name of the created volume"
-  value       = virakcloud_instance.instance_with_volume.volumes[0].name
+  value       = virakcloud_volume.test_volume.name
 }

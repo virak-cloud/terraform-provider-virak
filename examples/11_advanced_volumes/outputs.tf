@@ -52,20 +52,14 @@ output "network_details" {
   description = "Network configuration for volumes infrastructure"
   value = {
     network_id = virakcloud_network.volume_example_network.id
-    cidr       = virakcloud_network.volume_example_network.cidr
+    name       = virakcloud_network.volume_example_network.name
+    gateway    = virakcloud_network.volume_example_network.gateway
+    netmask    = virakcloud_network.volume_example_network.netmask
+    type       = virakcloud_network.volume_example_network.type
     instances_attached = [
       virakcloud_instance.volume_host.id,
       virakcloud_instance.migration_target.id
     ]
-  }
-}
-
-output "bucket_details" {
-  description = "Bucket for volume snapshots (if applicable)"
-  value = {
-    id   = virakcloud_bucket.volume_snapshots.id
-    name = virakcloud_bucket.volume_snapshots.name
-    url  = virakcloud_bucket.volume_snapshots.access_url
   }
 }
 

@@ -10,7 +10,7 @@ output "kubernetes_cluster_name" {
 
 output "kubernetes_cluster_version" {
   description = "The Kubernetes version of the cluster"
-  value       = virakcloud_kubernetes_cluster.example_cluster.version
+  value       = virakcloud_kubernetes_cluster.example_cluster.kubernetes_version_id
 }
 
 output "kubernetes_cluster_status" {
@@ -35,10 +35,10 @@ output "available_kubernetes_versions" {
 
 output "available_instance_offerings" {
   description = "Available instance offerings"
-  value       = data.virakcloud_instance_offerings.available
+  value       = data.virakcloud_instance_service_offerings.k8s.offerings
 }
 
 output "available_zones" {
   description = "Available zones in Virak Cloud"
-  value       = data.virakcloud_zones.available
+  value       = data.virakcloud_zones.available.zones
 }

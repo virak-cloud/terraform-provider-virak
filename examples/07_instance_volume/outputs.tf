@@ -21,7 +21,7 @@ output "instance_password" {
 
 output "volume_ids" {
   description = "The IDs of the volumes created with the instance"
-  value       = virakcloud_instance.example.volume_ids
+  value       = [virakcloud_volume.example.id]
 }
 
 output "volume_id" {

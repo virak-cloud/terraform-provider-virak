@@ -1,88 +1,101 @@
-terraform {
-  required_providers {
-    virakcloud = {
-      source = "registry.terraform.io/virak-cloud/virak-cloud"
-      version = ">= 0.1"
-    }
-  }
-}
-
 provider "virakcloud" {
-  token    = var.virakcloud_token
+  token = var.virakcloud_token
 }
 
-# Data sources for dynamic resource selection
 data "virakcloud_zones" "available" {}
-data "virakcloud_instance_offerings" "available" {}
-data "virakcloud_instance_images" "available" {}
-data "virakcloud_volume_offerings" "available" {}
 
-# Network for instances
+data "virakcloud_instance_service_offerings" "available" {
+  zone_id = data.virakcloud_zones.available.zones[0].id
+}
+
+data "virakcloud_instance_images" "available" {
+  zone_id = data.virakcloud_zones.available.zones[0].id
+}
+
+data "virakcloud_volume_service_offerings" "available" {
+  zone_id = data.virakcloud_zones.available.zones[0].id
+}
+
+data "virakcloud_network_service_offerings" "available" {
+  zone_id = data.virakcloud_zones.available.zones[0].id
+}
+
+locals {
+  primary_zone_id      = data.virakcloud_zones.available.zones[0].id
+  instance_offering_id = data.virakcloud_instance_service_offerings.available.offerings[0].id
+  volume_offering_id   = data.virakcloud_volume_service_offerings.available.offerings[0].id
+  network_offering_id  = data.virakcloud_network_service_offerings.available.offerings[0].id
+}
+
+resource "random_string" "suffix" {
+  length  = 6
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+}
+
 resource "virakcloud_network" "volume_example_network" {
-  name         = "advanced-volumes-network"
-  cidr         = "192.168.30.0/24"
-  gateway      = "192.168.30.1"
-  netmask      = "255.255.255.0"
-  network_type = "L3"
-  zone_id      = data.virakcloud_zones.available.zone_id
+  name                = "advanced-volumes-network-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  network_offering_id = local.network_offering_id
+  type                = "L3"
+  gateway             = "192.168.30.1"
+  netmask             = "255.255.255.0"
 }
 
-# Base instance to attach volumes to
 resource "virakcloud_instance" "volume_host" {
-  name = "volume-host-instance"
-
-  offering_id = data.virakcloud_instance_offerings.available.offering_id
-  image_id    = data.virakcloud_instance_images.available.image_id
-  zone_id     = data.virakcloud_zones.available.zone_id
+  name                = "volume-host-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.instance_offering_id
+  vm_image_id         = data.virakcloud_instance_images.available.images[0].id
+  network_ids         = [virakcloud_network.volume_example_network.id]
 }
 
-# Root volume for OS
-resource "virakcloud_volume" "root_volume" {
-  name       = "root-volume"
-  size       = 50  # GB - larger for OS and applications
-  offering_id = data.virakcloud_volume_offerings.available.offering_id
-  zone_id     = data.virakcloud_zones.available.zone_id
-}
-
-# Data volume for databases and persistent storage
-resource "virakcloud_volume" "data_volume" {
-  name       = "data-volume"
-  size       = 100  # GB - larger for data storage
-  offering_id = data.virakcloud_volume_offerings.available.offering_id
-  zone_id     = data.virakcloud_zones.available.zone_id
-}
-
-# Backup volume for archives and snapshots
-resource "virakcloud_volume" "backup_volume" {
-  name       = "backup-volume"
-  size       = 200  # GB - largest for backups
-  offering_id = data.virakcloud_volume_offerings.available.offering_id
-  zone_id     = data.virakcloud_zones.available.zone_id
-}
-
-# Standalone volumes (for future use or migration)
-resource "virakcloud_volume" "staging_volume" {
-  name       = "staging-volume"
-  size       = 20   # GB - smaller for staging
-  offering_id = data.virakcloud_volume_offerings.available.offering_id
-  zone_id     = data.virakcloud_zones.available.zone_id
-}
-
-# Migration target instance (for volume migration concepts)
 resource "virakcloud_instance" "migration_target" {
-  name                = "migration-target-instance"
-  zone_id             = data.virakcloud_zones.available.zone_id
-  service_offering_id = data.virakcloud_instance_service_offerings.available.offering_id
-  vm_image_id         = data.virakcloud_instance_images.available.image_id
+  name                = "migration-target-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.instance_offering_id
+  vm_image_id         = data.virakcloud_instance_images.available.images[0].id
   network_ids         = [virakcloud_network.volume_example_network.id]
 
   depends_on = [virakcloud_instance.volume_host]
 }
 
-# Example of lifecycle management with volumes
+resource "virakcloud_volume" "root_volume" {
+  name                = "root-volume-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.volume_offering_id
+  size                = 50
+  instance_id         = virakcloud_instance.volume_host.id
+}
+
+resource "virakcloud_volume" "data_volume" {
+  name                = "data-volume-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.volume_offering_id
+  size                = 100
+  instance_id         = virakcloud_instance.volume_host.id
+}
+
+resource "virakcloud_volume" "backup_volume" {
+  name                = "backup-volume-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.volume_offering_id
+  size                = 200
+}
+
+resource "virakcloud_volume" "staging_volume" {
+  name                = "staging-volume-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.volume_offering_id
+  size                = 20
+}
+
 resource "virakcloud_volume" "temporary_volume" {
-  name       = "temporary-volume"
-  size       = 10   # GB - temp volume
-  offering_id = data.virakcloud_volume_offerings.available.offering_id
-  zone_id     = data.virakcloud_zones.available.zone_id
+  name                = "temporary-volume-${random_string.suffix.result}"
+  zone_id             = local.primary_zone_id
+  service_offering_id = local.volume_offering_id
+  size                = 10
+  instance_id         = virakcloud_instance.volume_host.id
 }

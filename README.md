@@ -184,14 +184,13 @@ export VIRAKCLOUD_TOKEN="your-api-token-here"
 
 ### Standardized Provider Configuration
 
-Use Terraform variables with `env()` function defaults to automatically read from environment variables:
+Define a Terraform variable for the API token and feed it into the provider so you can override it via CLI or CI/CD:
 
 ```hcl
 variable "virakcloud_token" {
   type        = string
   description = "Virak Cloud API token"
   sensitive   = true
-  default     = env("VIRAKCLOUD_TOKEN")
 }
 
 provider "virakcloud" {
@@ -199,20 +198,11 @@ provider "virakcloud" {
 }
 ```
 
-### How the env() Function Works
-
-The `env()` function in Terraform variable defaults reads the value from environment variables at plan time. This approach:
-
-- Automatically uses environment variables when set
-- Allows overrides through Terraform variables
-- Keeps sensitive values out of configuration files
-- Works seamlessly with CI/CD pipelines and local development
+Terraform automatically maps the environment variable `TF_VAR_virakcloud_token` to the `virakcloud_token` variable, which keeps the credential out of version control and works consistently across environments.
 
 ### Security Note
 
-**Never hardcode sensitive values** like API tokens in your Terraform configuration files. Always use environment variables or secure secret management systems. The `env()` function ensures credentials are read from the environment rather than being stored in version control.
-
-This standardized approach ensures consistent configuration across all environments and follows security best practices.
+**Never hardcode sensitive values** like API tokens in your Terraform configuration files. Always use environment variables (for example by setting `TF_VAR_virakcloud_token`) or secure secret management systems to inject secrets rather than storing them in version control. This keeps your credentials secure and consistent across environments.
 
 ## Resources
 
